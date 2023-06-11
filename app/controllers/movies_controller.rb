@@ -10,6 +10,19 @@ class MoviesController < ApplicationController
     @all_ratings = Movie.all_ratings
     @ratings_to_show_hash = params[:ratings] || {}
     @movies = Movie.with_ratings(@ratings_to_show_hash.keys)
+
+    @sort_column = params[:sort_by]
+    @sort_column_css_class = nil
+
+    if @sort_column == 'title'
+      @movies = @movies.order(title: :asc)
+      @sort_column_css_class = 'hilite bg-warning'
+
+    elsif @sort_column == 'release_date'
+      @movies = @movies.order(release_date: :asc)
+      @sort_column_css_class = 'hilite bg-warning'
+      
+    end
   end
 
   def new
