@@ -10,29 +10,37 @@ class MoviesController < ApplicationController
     if params[:sort_by].present? || params[:ratings].present?
       session[:sort_by] = params[:sort_by]
       session[:ratings] = params[:ratings]
+      session[:first_visit] = false
     else
-      if session[:sort_by].present? || session[:ratings].present?
+      if session[:first_visit] || session[:sort_by].present? || session[:ratings].present?
         params[:sort_by] = session[:sort_by]
         params[:ratings] = session[:ratings]
         redirect_to movies_path(params) and return
       end
     end
-
+  
     @movies = if params[:ratings].present?
       Movie.where(rating: params[:ratings].keys)
     else
       Movie.all
     end
-
+  
     @movies = @movies.order(params[:sort_by]) if params[:sort_by].present?
     @sort_column = params[:sort_by]
     @sort_column_css_class = 'hilite'
     @all_ratings = Movie.all_ratings
-    @ratings_to_show_hash = params[:ratings] || {}
-
+  
+    if session[:first_visit].nil?
+      @ratings_to_show_hash = Hash[@all_ratings.map { |rating| [rating, "1"] }]
+      session[:first_visit] = false
+    else
+      @ratings_to_show_hash = params[:ratings] || {}
+    end
+  
     session[:sort_by] = params[:sort_by]
     session[:ratings] = params[:ratings]
   end
+  
 
   def new
     # default: render 'new' template
